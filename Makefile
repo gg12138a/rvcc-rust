@@ -2,7 +2,7 @@
 compiler: target/debug/rvcc-rust
 
 target/debug/rvcc-rust: src/*.rs
-	@cargo build --release
+	@cargo build -q --release
 
 .PHONY:
 test: compiler

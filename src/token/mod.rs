@@ -1,3 +1,5 @@
+use std::collections::LinkedList;
+
 pub type TokenNumType = i32;
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -31,8 +33,8 @@ impl Token {
     }
 }
 
-pub fn tokenize(raw: &str) -> Vec<Token> {
-    let mut res_vec = vec![];
+pub fn tokenize(raw: &str) -> LinkedList<Token> {
+    let mut tokens = LinkedList::new();
     let mut ch_iter = raw.chars().into_iter().peekable();
     let mut loc = 0;
 
@@ -59,10 +61,10 @@ pub fn tokenize(raw: &str) -> Vec<Token> {
                 }
 
                 let num = digit_str.parse::<TokenNumType>().unwrap();
-                res_vec.push(Token::new(TokenKind::NUM { val: num }, loc, len));
+                tokens.push_back(Token::new(TokenKind::NUM { val: num }, loc, len));
             }
             op if ch == '+' || ch == '-' => {
-                res_vec.push(Token::new(TokenKind::PUNCT { op }, loc, 1));
+                tokens.push_back(Token::new(TokenKind::PUNCT { op }, loc, 1));
             }
             _ => {
                 panic!("invaild token: {}{}", ch, ch_iter.collect::<String>());
@@ -71,11 +73,11 @@ pub fn tokenize(raw: &str) -> Vec<Token> {
 
         loc += 1;
     }
-    res_vec
+    tokens
 }
 
-pub fn get_num(v: &mut Vec<Token>) -> TokenNumType {
-    let tok = v.remove(0);
+pub fn consume_one_num(v: &mut LinkedList<Token>) -> TokenNumType {
+    let tok = v.pop_front().unwrap();
 
     if let TokenKind::NUM { val } = tok.token_kind {
         val
@@ -90,32 +92,32 @@ mod tests {
 
     #[test]
     pub fn tokenize_passed() {
-        let tok_vec: Vec<super::Token> = tokenize("  12 + 34 - 5 ");
+        let mut tokens = tokenize("  12 + 34 - 5 ");
 
-        assert_eq!(tok_vec.len(), 5);
+        assert_eq!(tokens.len(), 5);
 
         assert_eq!(
-            tok_vec.get(0).unwrap().token_kind,
+            tokens.pop_front().unwrap().token_kind,
             TokenKind::NUM { val: 12 }
         );
 
         assert_eq!(
-            tok_vec.get(1).unwrap().token_kind,
+            tokens.pop_front().unwrap().token_kind,
             TokenKind::PUNCT { op: '+' }
         );
 
         assert_eq!(
-            tok_vec.get(2).unwrap().token_kind,
+            tokens.pop_front().unwrap().token_kind,
             TokenKind::NUM { val: 34 }
         );
 
         assert_eq!(
-            tok_vec.get(3).unwrap().token_kind,
+            tokens.pop_front().unwrap().token_kind,
             TokenKind::PUNCT { op: '-' }
         );
 
         assert_eq!(
-            tok_vec.get(4).unwrap().token_kind,
+            tokens.pop_front().unwrap().token_kind,
             TokenKind::NUM { val: 5 }
         );
     }
