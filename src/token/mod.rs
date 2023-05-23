@@ -9,9 +9,9 @@ pub enum TokenKind {
 
 #[derive(Clone, Debug)]
 pub struct Token {
-    token_kind: TokenKind,
-    loc: u64,
-    len: u64,
+    pub token_kind: TokenKind,
+    pub loc: u64,
+    pub len: u64,
 }
 
 impl Token {
@@ -41,6 +41,7 @@ pub fn tokenize(raw: &str) -> Vec<Token> {
             ch if ch.is_whitespace() => {
                 // need do nothing. loc++ will be done later.
             }
+
             first_digit_ch if first_digit_ch.is_ascii_digit() => {
                 let mut digit_str = String::from(first_digit_ch);
                 let mut len = 1;
@@ -70,19 +71,17 @@ pub fn tokenize(raw: &str) -> Vec<Token> {
 
         loc += 1;
     }
-
-    for c in raw.chars() {
-        match c {
-            c if c.is_whitespace() => {
-                continue;
-            }
-            c if c.is_digit(10) => {}
-            c if c == '-' || c == '+' => {}
-            _ => {}
-        }
-    }
-
     res_vec
+}
+
+pub fn get_num(v: &mut Vec<Token>) -> TokenNumType {
+    let tok = v.remove(0);
+
+    if let TokenKind::NUM { val } = tok.token_kind {
+        val
+    } else {
+        panic!("not NUM type token.")
+    }
 }
 
 mod tests {
